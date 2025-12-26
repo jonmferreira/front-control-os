@@ -1,0 +1,256 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.filter.outputs.relevant }}
+      deps_changed: ${{ steps.filter.outputs.dependencies }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Filter changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant:
+              - 'src/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'vite.config.ts'
+              - 'tsconfig*.json'
+            dependencies:
+              - 'package.json'
+              - 'package-lock.json'
+
+      - name: Job summary
+        run: |
+          if [ "${{ steps.filter.outputs.relevant }}" = "true" ]; then
+            echo "## Relevant changes detected" >> $GITHUB_STEP_SUMMARY
+            echo "Changes in key paths were found. Subsequent jobs will execute." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## No relevant changes" >> $GITHUB_STEP_SUMMARY
+            echo "No changes were detected in monitored paths. Remaining jobs are skipped." >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ steps.filter.outputs.dependencies }}" = "true" ]; then
+            echo "- Dependency files changed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Dependency files unchanged." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  dependencies:
+    name: Prepare Dependencies
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.should_run == 'true'
+    outputs:
+      cache-hit: ${{ steps.cache-node-modules.outputs.cache-hit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true' || needs.changes.outputs.deps_changed == 'true'
+        run: npm ci
+
+      - name: Archive node modules
+        run: tar -czf node_modules.tar.gz node_modules
+
+      - name: Upload node modules artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules.tar.gz
+          retention-days: 1
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## Dependency preparation" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.cache-node-modules.outputs.cache-hit }}" = "true" ]; then
+            echo "- Cache hit: reused existing node_modules." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Cache miss: installed dependencies from scratch." >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.changes.outputs.deps_changed }}" = "true" ]; then
+            echo "- package.json or lockfile changed in this pull request." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Dependency manifests unchanged." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [changes, dependencies]
+    if: needs.changes.outputs.should_run == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+
+      - name: Download node modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+
+      - name: Extract node modules
+        run: |
+          tar -xzf node_modules.tar.gz
+          rm node_modules.tar.gz
+
+      - name: Build
+        run: npm run build
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## Build" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Build completed successfully." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Build failed. Check logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: [changes, dependencies]
+    if: needs.changes.outputs.should_run == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+
+      - name: Download node modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+
+      - name: Extract node modules
+        run: |
+          tar -xzf node_modules.tar.gz
+          rm node_modules.tar.gz
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## Lint" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Linting completed successfully." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Linting failed. Review the logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  vitest:
+    name: Vitest
+    runs-on: ubuntu-latest
+    needs: [changes, dependencies]
+    if: needs.changes.outputs.should_run == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+
+      - name: Download node modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+
+      - name: Extract node modules
+        run: |
+          tar -xzf node_modules.tar.gz
+          rm node_modules.tar.gz
+
+      - name: Run unit tests
+        run: npm test --if-present
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## Vitest" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Unit tests executed successfully." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Tests failed. Review the logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  storybook:
+    name: Storybook Smoke Test
+    runs-on: ubuntu-latest
+    needs: [changes, dependencies]
+    if: needs.changes.outputs.should_run == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+
+      - name: Download node modules artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+
+      - name: Extract node modules
+        run: |
+          tar -xzf node_modules.tar.gz
+          rm node_modules.tar.gz
+
+      - name: Storybook smoke test
+        run: npm run storybook -- --ci --smoke-test --host 0.0.0.0 --port 6006
+
+      - name: Storybook build
+        run: npm run build-storybook
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## Storybook" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Storybook smoke test and build completed successfully." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Storybook job failed. Review the logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configurações | Vue Prime Template</title>
+    <link id="prime-theme" rel="stylesheet" href="/lara-light-blue.css" />
+    <script>
+      (function () {
+        const storageKey = 'app-theme';
+        try {
+          const stored = window.localStorage.getItem(storageKey);
+          const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+          const link = document.getElementById('prime-theme');
+          if (link) {
+            link.setAttribute('href', theme === 'dark' ? '/lara-dark-blue.css' : '/lara-light-blue.css');
+          }
+        } catch (error) {
+          console.warn('Não foi possível ler o tema salvo.', error);
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100">
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+services:
+  os-web:
+    build:
+      context: .
+      target: os-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_OS_API_BASE_URL=http://localhost:3333
+      - VITE_OS_APP_TITLE=Console de Ordens de Serviço
+    restart: unless-stopped
+
+  os-storybook:
+    build:
+      context: .
+      target: os-storybook
+    ports:
+      - "6006:6006"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_OS_API_BASE_URL=http://localhost:3333
+      - VITE_OS_APP_TITLE=Console de Ordens de Serviço
+    restart: unless-stopped
+
+  os-ci:
+    build:
+      context: .
+      target: os-ci
+    profiles:
+      - ci
+    environment:
+      - NODE_ENV=test
+
+volumes:
+  node_modules:
