@@ -20,7 +20,7 @@
               id="email"
               v-model="credentials.email"
               type="email"
-              class="w-full"
+              class="w-full !px-3 !py-2"
               placeholder="seu@email.com"
               :invalid="!!errors.email"
               autocomplete="email"
@@ -38,6 +38,7 @@
             <Password
               id="password"
               v-model="credentials.password"
+              input-class="!px-3 !py-2"
               class="w-full"
               :feedback="false"
               toggle-mask
