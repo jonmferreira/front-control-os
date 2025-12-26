@@ -352,6 +352,8 @@ import ManagerStatusCard from './service-orders/components/ManagerStatusCard.vue
 import TeamProductivityCard from './service-orders/components/TeamProductivityCard.vue';
 import TechnicianPerformanceCard from './service-orders/components/TechnicianPerformanceCard.vue';
 import { resolveCustomInputComponent } from '@/helpers_and_formaters/customInputs';
+import { useOrders } from '@/composables/useOrders';
+import { OrderStatus } from '@/services/types/order.types';
 
 type Status = 'pendente' | 'em_andamento' | 'finalizada';
 type ChecklistValue = 'aprovado' | 'rejeitado' | 'nao_aplica' | null;
