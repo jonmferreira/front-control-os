@@ -1,9 +1,9 @@
 <template>
   <div class="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
-    <Card class="w-full max-w-md">
+    <Card class="w-full max-w-md bg-slate-100 dark:bg-slate-800">
       <template #title>
         <div class="text-center">
-          <h1 class="text-2xl font-bold">Console de Ordens de Serviço</h1>
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Console de Ordens de Serviço</h1>
           <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
             Faça login para continuar
           </p>
@@ -13,7 +13,7 @@
         <form @submit.prevent="handleLogin" class="space-y-4">
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-medium mb-1">
+            <label for="email" class="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-100">
               Email
             </label>
             <InputText
@@ -32,7 +32,7 @@
 
           <!-- Senha -->
           <div>
-            <label for="password" class="block text-sm font-medium mb-1">
+            <label for="password" class="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-100">
               Senha
             </label>
             <Password
