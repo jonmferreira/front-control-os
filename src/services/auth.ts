@@ -14,7 +14,7 @@ export interface AuthProfile {
 export interface AuthSession {
   token: string;
   refreshToken?: string;
-  expiresAt: string;
+  expiresAt: number; // timestamp em ms
   profile: AuthProfile;
 }
 
@@ -52,7 +52,8 @@ export async function authenticate(payload: LoginPayload): Promise<AuthSession> 
   });
 
   const mappedRole = mapRoleToFrontend(response.user.role);
-  const expiresAt = new Date(Date.now() + response.expiresIn * 60 * 1000).toISOString();
+  // expiresIn já vem em SEGUNDOS da API, não precisa multiplicar por 60
+  const expiresAt = Date.now() + response.expiresIn * 1000; // converter segundos para ms
 
   return {
     token: response.accessToken,

@@ -57,17 +57,23 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
+  console.log('[Router Guard] Navegando para:', to.path, to.name);
+
   if (to.name === 'os-section' && !isValidSection(to.params.section as string | undefined)) {
     return { name: 'os-section', params: { section: DEFAULT_SECTION } };
   }
 
   const auth = useAuth();
+  console.log('[Router Guard] isAuthenticated:', auth.isAuthenticated.value);
+  console.log('[Router Guard] isExpired:', auth.isExpired.value);
+
   const requiresAuth = Boolean(to.meta.requiresAuth);
   const redirectPath =
     typeof to.query.redirect === 'string' && to.query.redirect.startsWith('/') ? to.query.redirect : null;
   const shouldRedirectToLogin = requiresAuth && (!auth.isAuthenticated.value || auth.isExpired.value);
 
   if (to.name === 'login' && auth.isAuthenticated.value && !auth.isExpired.value) {
+    console.log('[Router Guard] Já autenticado, redirecionando para:', redirectPath ?? '/os');
     return redirectPath ?? { name: 'os-home' };
   }
 

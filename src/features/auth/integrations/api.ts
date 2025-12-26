@@ -13,7 +13,8 @@ export interface LoginCredentials {
 export interface LoginResponse {
   accessToken: string;
   refreshToken?: string;
-  expiresIn: number;
+  expiresAt: string; // ISO 8601 date string
+  expiresIn: number; // Segundos até expiração
   user: {
     id: string;
     name: string;
@@ -52,15 +53,29 @@ export function loadSession(): AuthSession | null {
   try {
     const session = JSON.parse(stored) as AuthSession;
 
+    console.log('[loadSession] Session do localStorage:', session);
+    console.log('[loadSession] expiresAt:', session.expiresAt, 'Type:', typeof session.expiresAt);
+    console.log('[loadSession] Date.now():', Date.now());
+
+    // Verifica se expiresAt é válido
+    if (!session.expiresAt || isNaN(session.expiresAt)) {
+      console.warn('[loadSession] expiresAt inválido, limpando sessão');
+      clearSession();
+      return null;
+    }
+
     // Verifica se expirou
     if (Date.now() > session.expiresAt) {
+      console.log('[loadSession] Sessão expirada, limpando...');
       clearSession();
       return null;
     }
 
     setAuthToken(session.token);
     return session;
-  } catch {
+  } catch (error) {
+    console.error('[loadSession] Erro ao carregar sessão:', error);
+    clearSession();
     return null;
   }
 }
@@ -75,28 +90,45 @@ export function clearSession(): void {
 // ============================================
 
 export async function login(credentials: LoginCredentials): Promise<AuthSession> {
-  const response = await POST<LoginResponse>('/auth/login', credentials);
+  console.log('[LOGIN] Iniciando login...');
 
-  // Mapear role do backend para frontend
-  const roleMap: Record<string, 'gerente' | 'tecnico' | 'responsavel'> = {
-    Admin: 'gerente',
-    Technician: 'tecnico',
-  };
+  try {
+    const response = await POST<LoginResponse>('/auth/login', credentials);
+    console.log('[LOGIN] ✅ Response recebida:', JSON.stringify(response, null, 2));
+    console.log('[LOGIN] expiresIn:', response.expiresIn);
+    console.log('[LOGIN] Type of expiresIn:', typeof response.expiresIn);
 
-  const session: AuthSession = {
-    token: response.accessToken,
-    refreshToken: response.refreshToken,
-    expiresAt: Date.now() + response.expiresIn * 60 * 1000,
-    user: {
-      id: response.user.id,
-      name: response.user.name,
-      email: response.user.email,
-      role: roleMap[response.user.role] || 'tecnico',
-    },
-  };
+    // Mapear role do backend para frontend
+    const roleMap: Record<string, 'gerente' | 'tecnico' | 'responsavel'> = {
+      Admin: 'gerente',
+      Technician: 'tecnico',
+    };
 
-  saveSession(session);
-  return session;
+    // Usar timestamp fixo temporariamente para debug
+    const expiresAtDebug = Date.now() + (60 * 60 * 1000); // 1 hora fixa
+    console.log('[LOGIN] expiresAt calculado:', expiresAtDebug);
+
+    const session: AuthSession = {
+      token: response.accessToken,
+      refreshToken: response.refreshToken,
+      expiresAt: expiresAtDebug, // TEMPORÁRIO: usando valor fixo
+      user: {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: roleMap[response.user.role] || 'tecnico',
+      },
+    };
+
+    console.log('[LOGIN] ✅ Session criada:', JSON.stringify(session, null, 2));
+    console.log('[LOGIN] Salvando session no localStorage...');
+    saveSession(session);
+    console.log('[LOGIN] ✅ Session salva com sucesso!');
+    return session;
+  } catch (error) {
+    console.error('[LOGIN] ❌ ERRO:', error);
+    throw error;
+  }
 }
 
 export async function logout(): Promise<void> {

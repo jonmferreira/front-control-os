@@ -196,9 +196,9 @@ const sessionMessage = computed(() => {
 });
 
 const quickIdentities = [
-  { label: 'Técnico de campo', identifier: 'tecnico@os.app.br', password: 'segredo123', roleLabel: 'Técnico', icon: 'pi pi-wrench' },
-  { label: 'Responsável', identifier: 'responsavel@os.app.br', password: 'segredo123', roleLabel: 'Resp.', icon: 'pi pi-users' },
-  { label: 'Gerente', identifier: 'gerente@os.app.br', password: 'segredo123', roleLabel: 'Gerente', icon: 'pi pi-briefcase' }
+  { label: 'Técnico de campo', identifier: 'tecnico@os.app.br', password: 'Admin@123', roleLabel: 'Técnico', icon: 'pi pi-wrench' },
+  { label: 'Responsável', identifier: 'responsavel@os.app.br', password: 'Admin@123', roleLabel: 'Resp.', icon: 'pi pi-users' },
+  { label: 'Gerente', identifier: 'gerente@os.app.br', password: 'Admin@123', roleLabel: 'Gerente', icon: 'pi pi-briefcase' }
 ];
 
 const appTitle = OS_APP_TITLE;
@@ -210,13 +210,18 @@ const applyIdentity = (identity: (typeof quickIdentities)[number]) => {
 };
 
 const handleSubmit = async () => {
+  console.log('[LoginView] handleSubmit chamado', form);
   errorMessage.value = '';
   loading.value = true;
 
   try {
+    console.log('[LoginView] Chamando auth.login()');
     await auth.login({ ...form }, { remember: remember.value });
+    console.log('[LoginView] Login com sucesso, redirecionando para:', redirectPath.value);
     await router.replace(redirectPath.value);
+    console.log('[LoginView] Redirecionamento completo');
   } catch (error) {
+    console.error('[LoginView] Erro no login:', error);
     errorMessage.value = error instanceof Error ? error.message : 'Não foi possível realizar login';
   } finally {
     loading.value = false;
