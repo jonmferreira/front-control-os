@@ -5,10 +5,9 @@ import SettingsOverview from '@/views/settings/SettingsOverview.vue';
 import SettingsSectionView from '@/views/settings/SettingsSectionView.vue';
 import LoginView from '@/views/auth/LoginView.vue';
 import { DEFAULT_SECTION, isValidSection } from '@/data/settings-menu';
-import { useAuth } from '@/composables/useAuth';
-import type { UserRole } from '@/services/auth';
+import { useAuth } from '@/features/auth/composables/useAuth';
 
-const SECTION_ROLE_MAP: Record<string, UserRole[]> = {
+const SECTION_ROLE_MAP: Record<string, string[]> = {
   'painel-os': ['tecnico', 'responsavel', 'gerente'],
   checklists: ['responsavel', 'gerente'],
   equipe: ['responsavel', 'gerente'],
