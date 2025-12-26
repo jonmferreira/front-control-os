@@ -73,7 +73,7 @@
           </ul>
         </section>
 
-        <Card class="h-full rounded-3xl border border-white/10 bg-white/90 shadow-2xl backdrop-blur lg:ml-auto lg:w-full">
+        <Card class="login-card-gradient h-full rounded-3xl border border-white/10 shadow-2xl backdrop-blur lg:ml-auto lg:w-full">
           <template #title>
             <div class="flex items-center justify-between">
               <span>Entrar no console</span>

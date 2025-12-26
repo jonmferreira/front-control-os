@@ -153,3 +153,34 @@ async function handleLogin() {
   }
 }
 </script>
+
+<style scoped>
+/* Força cor preta nos labels */
+label {
+  color: #000 !important;
+}
+
+:deep(.p-card) {
+  background-color: #f1f5f9 !important; /* bg-slate-100 */
+}
+
+/* Padding nos inputs */
+:deep(.p-inputtext) {
+  padding: 0.5rem 0.75rem !important; /* py-2 px-3 */
+}
+
+:deep(.p-password input) {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  label {
+    color: #fff !important;
+  }
+
+  :deep(.p-card) {
+    background-color: #1e293b !important; /* bg-slate-800 */
+  }
+}
+</style>

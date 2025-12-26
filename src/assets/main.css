@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .p-card {
+    @apply shadow-md border border-slate-200/60 dark:border-slate-700/80;
+  }
+
+  .p-panel .p-panel-header {
+    @apply bg-transparent text-slate-600 dark:text-slate-200 font-semibold;
+  }
+
+  .p-panel .p-panel-content {
+    @apply bg-transparent;
+  }
+
+  .p-divider.p-divider-horizontal:before {
+    @apply border-slate-200 dark:border-slate-700;
+  }
+}
 
 :root {
   color-scheme: light;
@@ -24,18 +41,18 @@ body {
   min-height: 100vh;
 }
 
-.p-card {
-  @apply shadow-md border border-slate-200/60 dark:border-slate-700/80;
+.p-card-title > .flex.items-center.justify-between > span:nth-of-type(1) {
+  @apply text-black;
 }
 
-.p-panel .p-panel-header {
-  @apply bg-transparent text-slate-600 dark:text-slate-200 font-semibold;
+.p-message-wrapper {
+  @apply text-yellow-900;
 }
 
-.p-panel .p-panel-content {
-  @apply bg-transparent;
+.p-button-label {
+  @apply text-black;
 }
 
-.p-divider.p-divider-horizontal:before {
-  @apply border-slate-200 dark:border-slate-700;
+.login-card-gradient {
+  background: linear-gradient(135deg, #f3e7f9 0%, #f8e8ff 50%, #fde8f5 100%) !important;
 }
