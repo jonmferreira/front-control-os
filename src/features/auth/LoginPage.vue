@@ -13,8 +13,8 @@
         <form @submit.prevent="handleLogin" class="space-y-4">
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-100">
-              Email
+            <label for="email" class="block text-sm font-medium mb-1 !text-black dark:!text-white">
+              E-mail ou usuário
             </label>
             <InputText
               id="email"
@@ -32,7 +32,7 @@
 
           <!-- Senha -->
           <div>
-            <label for="password" class="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-100">
+            <label for="password" class="block text-sm font-medium mb-1 !text-black dark:!text-white">
               Senha
             </label>
             <Password
