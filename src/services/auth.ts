@@ -1,4 +1,5 @@
-import { OS_API_BASE_URL } from '@/config/env';
+import { apiRequest } from './api/client';
+import type { LoginResponse } from './types/auth.types';
 
 export type UserRole = 'tecnico' | 'responsavel' | 'gerente';
 
@@ -22,14 +23,18 @@ export interface LoginPayload {
   password: string;
 }
 
-export class SessionExpiredError extends Error {
-  constructor(message = 'Sessão expirada') {
-    super(message);
-    this.name = 'SessionExpiredError';
+export { SessionExpiredError } from './api/client';
+
+export function mapRoleToFrontend(backendRole: 'Admin' | 'Technician'): UserRole {
+  switch (backendRole) {
+    case 'Admin':
+      return 'gerente';
+    case 'Technician':
+      return 'tecnico';
+    default:
+      return 'tecnico';
   }
 }
-
-const LOGIN_ENDPOINT = `${OS_API_BASE_URL}/auth/login`;
 
 export function isSessionExpired(expiresAt?: string | null): boolean {
   if (!expiresAt) return true;
@@ -38,103 +43,28 @@ export function isSessionExpired(expiresAt?: string | null): boolean {
 }
 
 export async function authenticate(payload: LoginPayload): Promise<AuthSession> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const response = await apiRequest<LoginResponse>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: payload.identifier,
+      password: payload.password,
+    }),
+  });
 
-  try {
-    const response = await fetch(LOGIN_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal
-    });
-
-    if (!response.ok) {
-      const errorMessage = await extractErrorMessage(response);
-      throw new Error(errorMessage ?? 'Falha ao autenticar');
-    }
-
-    const data = await response.json();
-    return normalizeSession(data);
-  } catch (error) {
-    return buildMockSession(payload, error);
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-async function extractErrorMessage(response: Response): Promise<string | null> {
-  try {
-    const data = await response.json();
-    if (data?.message) {
-      return String(data.message);
-    }
-  } catch (error) {
-    console.warn('Não foi possível extrair mensagem de erro da API de login.', error);
-  }
-
-  return response.status === 401 ? 'Credenciais inválidas' : null;
-}
-
-function normalizeSession(data: any): AuthSession {
-  const expiresAt = data?.expiresAt ?? new Date(Date.now() + 1000 * 60 * 30).toISOString();
-  const profile = data?.profile ?? {};
-  const token = data?.token ?? `session-${Math.random().toString(36).slice(2, 8)}`;
+  const mappedRole = mapRoleToFrontend(response.user.role);
+  const expiresAt = new Date(Date.now() + response.expiresIn * 60 * 1000).toISOString();
 
   return {
-    token,
-    refreshToken: data?.refreshToken ?? undefined,
+    token: response.accessToken,
+    refreshToken: response.refreshToken,
     expiresAt,
     profile: {
-      id: profile.id ?? 'user-unknown',
-      name: profile.name ?? 'Usuário do console',
-      email: profile.email ?? 'usuario@os.app.br',
-      role: (profile.role as UserRole) ?? 'tecnico',
-      username: profile.username ?? payloadUsernameFallback(profile)
-    }
+      id: response.user.id,
+      name: response.user.name,
+      email: response.user.email,
+      role: mappedRole,
+      username: response.user.email.split('@')[0],
+    },
   };
 }
 
-function payloadUsernameFallback(profile: any): string {
-  if (profile?.username) {
-    return String(profile.username);
-  }
-
-  return 'os-user';
-}
-
-function buildMockSession(payload: LoginPayload, error: unknown): AuthSession {
-  console.warn('[mock] Falha ao chamar API de login, retornando sessão simulada.', error);
-
-  const role = inferRoleFromIdentifier(payload.identifier);
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 45).toISOString();
-
-  return {
-    token: `mock-token-${Math.random().toString(36).slice(2, 8)}`,
-    expiresAt,
-    profile: {
-      id: 'user-mock',
-      name: buildMockName(role),
-      email: payload.identifier.includes('@') ? payload.identifier : `${payload.identifier}@os.app.br`,
-      role,
-      username: payload.identifier
-    }
-  };
-}
-
-function inferRoleFromIdentifier(identifier: string): UserRole {
-  const normalized = identifier.toLowerCase();
-  if (normalized.includes('gerente')) return 'gerente';
-  if (normalized.includes('resp') || normalized.includes('lead')) return 'responsavel';
-  return 'tecnico';
-}
-
-function buildMockName(role: UserRole): string {
-  const names: Record<UserRole, string> = {
-    tecnico: 'Técnico de campo',
-    responsavel: 'Técnico responsável',
-    gerente: 'Gerente de operações'
-  };
-
-  return names[role];
-}
