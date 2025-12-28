@@ -4,58 +4,28 @@
     <template #content>
       <div class="space-y-4">
         <div class="space-y-2">
-          <label for="template-name" class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Nome do Template *
+          <label for="template-title" class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            Título do Template *
           </label>
           <InputText
-            id="template-name"
-            v-model="formData.name"
+            id="template-title"
+            v-model="formData.title"
             placeholder="Ex: Instalação de Rede"
             class="w-full"
-            :invalid="!!errors.name"
+            :invalid="!!errors.title"
           />
-          <small v-if="errors.name" class="text-red-600">{{ errors.name }}</small>
+          <small v-if="errors.title" class="text-red-600">{{ errors.title }}</small>
         </div>
 
         <div class="space-y-2">
-          <label for="template-description" class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Descrição
+          <label for="publish-immediately" class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            Publicação
           </label>
-          <Textarea
-            id="template-description"
-            v-model="formData.description"
-            placeholder="Descreva o objetivo deste template..."
-            rows="3"
-            class="w-full"
-          />
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2">
-          <div class="space-y-2">
-            <label for="template-category" class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              Categoria *
+          <div class="flex items-center gap-3 h-[42px]">
+            <InputSwitch v-model="formData.publishImmediately" input-id="publish-immediately" />
+            <label for="publish-immediately" class="text-sm text-slate-600 dark:text-slate-300">
+              {{ formData.publishImmediately ? 'Publicar imediatamente' : 'Salvar como rascunho' }}
             </label>
-            <Dropdown
-              id="template-category"
-              v-model="formData.category"
-              :options="categories"
-              placeholder="Selecione uma categoria"
-              class="w-full"
-              :invalid="!!errors.category"
-            />
-            <small v-if="errors.category" class="text-red-600">{{ errors.category }}</small>
-          </div>
-
-          <div class="space-y-2">
-            <label for="template-status" class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              Status
-            </label>
-            <div class="flex items-center gap-3 h-[42px]">
-              <InputSwitch v-model="formData.isActive" input-id="template-status" />
-              <label for="template-status" class="text-sm text-slate-600 dark:text-slate-300">
-                {{ formData.isActive ? 'Ativo' : 'Inativo' }}
-              </label>
-            </div>
           </div>
         </div>
 
@@ -115,15 +85,6 @@
             :disabled="saving"
             @click="$emit('cancel')"
           />
-          <Button
-            v-if="isEditing"
-            icon="pi pi-trash"
-            label="Excluir"
-            severity="danger"
-            outlined
-            :disabled="saving"
-            @click="$emit('delete')"
-          />
         </div>
       </div>
     </template>
@@ -135,19 +96,16 @@ import { ref, computed } from 'vue';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import Textarea from 'primevue/textarea';
-import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
 import Message from 'primevue/message';
-import { ChecklistInputType } from '@/modules/technician/service-orders/types';
 import Divider from 'primevue/divider';
 import type { CreateChecklistTemplatePayload, CreateTemplateItemPayload } from '../types';
 import { validateTemplatePayload } from '../helpers';
 import TemplateItemForm from './TemplateItemForm.vue';
+import { useAuthStore } from '@/stores/auth';
 
 interface Props {
   template?: CreateChecklistTemplatePayload;
-  categories: string[];
   saving?: boolean;
 }
 
@@ -159,17 +117,16 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   save: [payload: CreateChecklistTemplatePayload];
   cancel: [];
-  delete: [];
 }>();
 
+const authStore = useAuthStore();
 const isEditing = computed(() => !!props.template);
 
 const formData = ref<CreateChecklistTemplatePayload>(
   props.template || {
-    name: '',
-    description: '',
-    category: '',
-    isActive: true,
+    title: '',
+    publishedBy: authStore.profile?.username || 'admin',
+    publishImmediately: true,
     items: []
   }
 );
@@ -179,9 +136,8 @@ const errors = ref<Record<string, string>>({});
 function addItem() {
   const newItem: CreateTemplateItemPayload = {
     description: '',
-    inputType: ChecklistInputType.TEXT,
-    required: false,
-    order: formData.value.items.length
+    hasCustomInput: false,
+    displayOrder: formData.value.items.length
   };
   formData.value.items.push(newItem);
 }
@@ -193,7 +149,7 @@ function updateItem(index: number, updatedItem: CreateTemplateItemPayload) {
 function removeItem(index: number) {
   formData.value.items.splice(index, 1);
   formData.value.items.forEach((item, i) => {
-    item.order = i;
+    item.displayOrder = i;
   });
 }
 
@@ -203,7 +159,7 @@ function moveItemUp(index: number) {
   formData.value.items[index - 1] = formData.value.items[index]!;
   formData.value.items[index] = temp!;
   formData.value.items.forEach((item, i) => {
-    item.order = i;
+    item.displayOrder = i;
   });
 }
 
@@ -213,7 +169,7 @@ function moveItemDown(index: number) {
   formData.value.items[index + 1] = formData.value.items[index]!;
   formData.value.items[index] = temp!;
   formData.value.items.forEach((item, i) => {
-    item.order = i;
+    item.displayOrder = i;
   });
 }
 

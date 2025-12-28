@@ -6,16 +6,9 @@
           v-model="searchQuery"
           placeholder="Buscar templates..."
           class="w-full max-w-md"
-        >
-        </InputText>
+        />
       </div>
       <div class="flex flex-wrap gap-2">
-        <Dropdown
-          v-model="selectedCategory"
-          :options="['Todos', ...categories]"
-          placeholder="Filtrar por categoria"
-          class="w-48"
-        />
         <Dropdown
           v-model="selectedStatus"
           :options="statusOptions"
@@ -56,24 +49,20 @@
         <div class="flex items-start justify-between gap-3">
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
-              <h3 class="font-semibold text-slate-800 dark:text-slate-100">{{ template.name }}</h3>
+              <h3 class="font-semibold text-slate-800 dark:text-slate-100">{{ template.title }}</h3>
               <Tag
-                :value="template.isActive ? 'Ativo' : 'Inativo'"
-                :severity="template.isActive ? 'success' : 'secondary'"
+                :value="template.isPublished ? 'Publicado' : 'Rascunho'"
+                :severity="template.isPublished ? 'success' : 'secondary'"
               />
-              <Tag :value="template.category" severity="info" />
             </div>
-            <p v-if="template.description" class="text-sm text-slate-600 dark:text-slate-300 mb-2">
-              {{ template.description }}
-            </p>
             <div class="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
               <span class="flex items-center gap-1">
-                <i class="pi pi-list"></i>
-                {{ template.itemsCount }} itens
+                <i class="pi pi-user"></i>
+                {{ template.publishedBy }}
               </span>
               <span class="flex items-center gap-1">
-                <i class="pi pi-chart-bar"></i>
-                {{ template.usageCount }} usos
+                <i class="pi pi-list"></i>
+                {{ template.items.length }} itens
               </span>
               <span class="flex items-center gap-1">
                 <i class="pi pi-clock"></i>
@@ -83,24 +72,10 @@
           </div>
           <div class="flex gap-2">
             <Button
-              icon="pi pi-pencil"
+              icon="pi pi-eye"
               size="small"
               outlined
-              @click.stop="$emit('edit', template.id)"
-            />
-            <Button
-              icon="pi pi-copy"
-              size="small"
-              outlined
-              severity="secondary"
-              @click.stop="$emit('duplicate', template.id)"
-            />
-            <Button
-              :icon="template.isActive ? 'pi pi-eye-slash' : 'pi pi-eye'"
-              size="small"
-              outlined
-              :severity="template.isActive ? 'warn' : 'success'"
-              @click.stop="$emit('toggle-status', template.id, !template.isActive)"
+              @click.stop="$emit('select', template)"
             />
           </div>
         </div>
@@ -118,11 +93,10 @@ import Tag from 'primevue/tag';
 import Message from 'primevue/message';
 import Skeleton from 'primevue/skeleton';
 import type { ChecklistTemplate } from '../types';
-import { searchTemplates, filterByCategory, filterByStatus, formatLastUpdate } from '../helpers';
+import { searchTemplates, filterByStatus, formatLastUpdate } from '../helpers';
 
 interface Props {
   templates: ChecklistTemplate[];
-  categories: string[];
   loading?: boolean;
   error?: string;
 }
@@ -135,31 +109,21 @@ const props = withDefaults(defineProps<Props>(), {
 defineEmits<{
   select: [template: ChecklistTemplate];
   create: [];
-  edit: [templateId: string];
-  duplicate: [templateId: string];
-  'toggle-status': [templateId: string, isActive: boolean];
 }>();
 
 const searchQuery = ref('');
-const selectedCategory = ref('Todos');
 const selectedStatus = ref<boolean | null>(null);
 
 const statusOptions = [
   { label: 'Todos', value: null },
-  { label: 'Ativos', value: true },
-  { label: 'Inativos', value: false }
+  { label: 'Publicados', value: true },
+  { label: 'Rascunhos', value: false }
 ];
 
 const filteredTemplates = computed(() => {
   let result = props.templates;
-
   result = searchTemplates(result, searchQuery.value);
-
-  const category = selectedCategory.value === 'Todos' ? null : selectedCategory.value;
-  result = filterByCategory(result, category);
-
   result = filterByStatus(result, selectedStatus.value);
-
   return result;
 });
 </script>

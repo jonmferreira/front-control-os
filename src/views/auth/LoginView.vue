@@ -3,7 +3,6 @@
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),transparent_45%)]" />
     <div class="pointer-events-none absolute left-[-12%] top-1/3 h-80 w-80 rounded-full bg-emerald-500/20 blur-3xl" />
     <div class="pointer-events-none absolute right-[-14%] top-10 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
-
     <div class="relative mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 lg:px-6 lg:py-16">
       <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -15,7 +14,6 @@
         </div>
         <Tag value="Acesso seguro" severity="success" class="self-start" />
       </header>
-
       <div class="mt-8 grid flex-1 gap-6 lg:grid-cols-2">
         <section class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
           <div class="flex items-center justify-between gap-3">
@@ -32,7 +30,6 @@
               <p class="text-xs text-slate-200">Checklist em atraso</p>
             </div>
           </div>
-
           <ul class="mt-6 grid gap-4 text-sm text-slate-100 lg:grid-cols-2">
             <li class="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
               <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-lg text-emerald-200">
@@ -72,7 +69,6 @@
             </li>
           </ul>
         </section>
-
         <Card class="login-card-gradient h-full rounded-3xl border border-white/10 shadow-2xl backdrop-blur lg:ml-auto lg:w-full">
           <template #title>
             <span>Entrar no console</span>
@@ -80,15 +76,9 @@
           <template #content>
             <form class="space-y-5" @submit.prevent="handleSubmit">
               <Message v-if="sessionMessage" severity="warn" :closable="false" class="rounded-xl">
-                <template #icon>
-                  <i class="pi pi-exclamation-triangle !text-red-700"></i>
-                </template>
-                {{ sessionMessage }}
               </Message>
               <Message v-if="errorMessage" severity="error" :closable="false" class="rounded-xl">{{ errorMessage }}</Message>
-
-              <div class="space-y-3">
-                <span class="p-float-label">
+              <Message v-if="sessionMessage" severity="warn" :closable="false" class="rounded-xl">{{ sessionMessage }}</Message>
                   <InputText id="identifier" v-model="form.identifier" class="w-full" autocomplete="username" />
                   <label for="identifier">E-mail ou usuário</label>
                 </span>
@@ -105,7 +95,6 @@
                   <label for="password">Senha</label>
                 </span>
               </div>
-
               <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
                 <div class="flex items-center gap-2">
                   <Checkbox id="remember" v-model="remember" binary />
@@ -113,7 +102,6 @@
                 </div>
                 <span class="text-xs text-slate-500">Revalidação automática em acessos longos.</span>
               </div>
-
               <Button
                 type="submit"
                 label="Acessar painel"
@@ -121,7 +109,6 @@
                 class="w-full justify-center"
                 :loading="loading"
               />
-
               <div class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Perfis disponíveis</p>
                 <div class="mt-3 grid gap-2 md:grid-cols-3">
@@ -150,7 +137,6 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import Button from 'primevue/button';
@@ -161,29 +147,23 @@ import Message from 'primevue/message';
 import Password from 'primevue/password';
 import Tag from 'primevue/tag';
 import { useRoute, useRouter } from 'vue-router';
-
 import { useAuth } from '@/composables/useAuth';
 import { OS_APP_TITLE } from '@/config/env';
 import { UserRole, UserRoleLabel, UserRoleFriendlyLabel, UserRoleIcon } from '@/types/roles';
-
 const auth = useAuth();
 const router = useRouter();
 const route = useRoute();
-
 const form = reactive({
   identifier: '',
   password: ''
 });
-
 const remember = ref(true);
 const loading = ref(false);
 const errorMessage = ref('');
-
 const redirectPath = computed(() => {
   const redirect = route.query.redirect;
   return typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/os';
 });
-
 const sessionMessage = computed(() => {
   const reason = route.query.reason;
   if (reason === 'expired') {
@@ -197,7 +177,6 @@ const sessionMessage = computed(() => {
   }
   return '';
 });
-
 const quickIdentities = [
   {
     role: UserRole.TECNICO,
@@ -224,27 +203,22 @@ const quickIdentities = [
     icon: UserRoleIcon[UserRole.ADMINISTRADOR]
   }
 ];
-
 const appTitle = OS_APP_TITLE;
-
 const applyIdentity = (identity: (typeof quickIdentities)[number]) => {
   form.identifier = identity.identifier;
   form.password = identity.password;
   errorMessage.value = '';
 };
-
 const handleSubmit = async () => {
   console.log('[LoginView] handleSubmit chamado', form);
   errorMessage.value = '';
   loading.value = true;
-
   try {
     console.log('[LoginView] Chamando auth.login()');
     await auth.login({ ...form }, { remember: remember.value });
     console.log('[LoginView] ✅ Login com sucesso!');
     console.log('[LoginView] Redirecionando para:', redirectPath.value);
     console.log('[LoginView] Tipo de redirectPath:', typeof redirectPath.value);
-
     const result = await router.replace(redirectPath.value);
     console.log('[LoginView] Resultado do router.replace:', result);
     console.log('[LoginView] ✅ Redirecionamento completo! Rota atual:', router.currentRoute.value.path);
