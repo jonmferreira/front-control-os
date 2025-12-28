@@ -1,8 +1,8 @@
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-black">
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-cyan-500/10 via-transparent to-transparent" />
-    <div class="pointer-events-none absolute left-[-16%] top-12 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
-    <div class="pointer-events-none absolute right-[-20%] top-1/3 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
+  <div class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),transparent_45%)]" />
+    <div class="pointer-events-none absolute left-[-12%] top-1/3 h-80 w-80 rounded-full bg-emerald-500/20 blur-3xl" />
+    <div class="pointer-events-none absolute right-[-14%] top-10 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
 
     <div class="relative z-10">
       <SettingsHeader
@@ -19,7 +19,7 @@
       <section class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 text-sm lg:px-6">
         <Tag v-if="roleLabel" :value="roleLabel" icon="pi pi-user" severity="info" class="rounded-full" />
         <Tag v-if="sessionWindow" :value="`Sessão até ${sessionWindow}`" icon="pi pi-clock" severity="secondary" class="rounded-full" />
-        <p class="text-xs text-slate-600 dark:text-slate-300">
+        <p class="text-xs text-slate-200">
           Painel base do console de OS com shell atualizado e sessão alinhada ao perfil.
         </p>
       </section>
