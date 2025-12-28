@@ -34,7 +34,7 @@
       <Card>
         <template #title>
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <span>Lista de OS por status</span>
+            <span style="color: white;">Lista de OS por status</span>
             <TabMenu :model="statusTabs" :active-index="activeStatusIndex" @tab-change="handleStatusTabChange" />
           </div>
         </template>

@@ -49,8 +49,13 @@ body {
   @apply text-yellow-900;
 }
 
-.p-button-label {
-  @apply text-black;
+.p-button:not(.p-button-outlined):not(.p-button-text) .p-button-label {
+  @apply text-white;
+}
+
+.p-button-outlined .p-button-label,
+.p-button-text .p-button-label {
+  @apply text-inherit;
 }
 
 .login-card-gradient {

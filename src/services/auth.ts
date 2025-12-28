@@ -1,7 +1,8 @@
 import { apiRequest } from './api/client';
 import type { LoginResponse } from './types/auth.types';
+import { UserRole } from '@/types/roles';
 
-export type UserRole = 'tecnico' | 'responsavel' | 'gerente';
+export type { UserRole };
 
 export interface AuthProfile {
   id: string;
@@ -28,11 +29,11 @@ export { SessionExpiredError } from './api/client';
 export function mapRoleToFrontend(backendRole: 'Admin' | 'Technician'): UserRole {
   switch (backendRole) {
     case 'Admin':
-      return 'gerente';
+      return UserRole.ADMINISTRADOR;
     case 'Technician':
-      return 'tecnico';
+      return UserRole.TECNICO;
     default:
-      return 'tecnico';
+      return UserRole.TECNICO;
   }
 }
 

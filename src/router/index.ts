@@ -5,7 +5,7 @@ import SettingsOverview from '@/views/settings/SettingsOverview.vue';
 import SettingsSectionView from '@/views/settings/SettingsSectionView.vue';
 import LoginView from '@/views/auth/LoginView.vue';
 import { DEFAULT_SECTION, isValidSection } from '@/data/settings-menu';
-import { useAuth } from '@/composables/useAuth';
+import { useAuthStore } from '@/stores/auth';
 
 const SECTION_ROLE_MAP: Record<string, string[]> = {
   'painel-os': ['tecnico', 'responsavel', 'gerente'],
@@ -64,21 +64,21 @@ router.beforeEach((to) => {
     return { name: 'os-section', params: { section: DEFAULT_SECTION } };
   }
 
-  const auth = useAuth();
-  console.log('[Router Guard] isAuthenticated:', auth.isAuthenticated.value);
+  const authStore = useAuthStore();
+  console.log('[Router Guard] isAuthenticated:', authStore.isAuthenticated);
 
   const requiresAuth = Boolean(to.meta.requiresAuth);
   const redirectPath =
     typeof to.query.redirect === 'string' && to.query.redirect.startsWith('/') ? to.query.redirect : null;
 
   // Se está indo para login e já está autenticado, redireciona
-  if (to.name === 'login' && auth.isAuthenticated.value) {
+  if (to.name === 'login' && authStore.isAuthenticated) {
     console.log('[Router Guard] Já autenticado, redirecionando para:', redirectPath ?? '/os');
     return redirectPath ?? { name: 'os-home' };
   }
 
   // Se precisa de auth e não está autenticado, vai pro login (SEM verificar expiração)
-  if (requiresAuth && !auth.isAuthenticated.value) {
+  if (requiresAuth && !authStore.isAuthenticated) {
     console.log('[Router Guard] Não autenticado, redirecionando para login');
     return {
       name: 'login',
@@ -86,13 +86,13 @@ router.beforeEach((to) => {
     };
   }
 
-  if (to.meta.allowedRoles && !auth.hasRole(to.meta.allowedRoles)) {
+  if (to.meta.allowedRoles && !authStore.hasRole(to.meta.allowedRoles)) {
     return { name: 'os-home', query: { reason: 'forbidden' } };
   }
 
   if (to.name === 'os-section') {
     const sectionRoles = SECTION_ROLE_MAP[to.params.section as string] ?? SECTION_ROLE_MAP[DEFAULT_SECTION];
-    if (sectionRoles && !auth.hasRole(sectionRoles)) {
+    if (sectionRoles && !authStore.hasRole(sectionRoles)) {
       return { name: 'os-home', query: { reason: 'forbidden' } };
     }
   }

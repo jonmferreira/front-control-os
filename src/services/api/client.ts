@@ -45,7 +45,7 @@ export async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const { session, logout } = useAuth();
-  const token = session.value.token;
+  const token = session?.value?.token ?? null;
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',

@@ -75,14 +75,16 @@
 
         <Card class="login-card-gradient h-full rounded-3xl border border-white/10 shadow-2xl backdrop-blur lg:ml-auto lg:w-full">
           <template #title>
-            <div class="flex items-center justify-between">
-              <span>Entrar no console</span>
-              <Tag value="OS + Checklists" severity="info" />
-            </div>
+            <span>Entrar no console</span>
           </template>
           <template #content>
             <form class="space-y-5" @submit.prevent="handleSubmit">
-              <Message v-if="sessionMessage" severity="warn" :closable="false" class="rounded-xl">{{ sessionMessage }}</Message>
+              <Message v-if="sessionMessage" severity="warn" :closable="false" class="rounded-xl">
+                <template #icon>
+                  <i class="pi pi-exclamation-triangle !text-red-700"></i>
+                </template>
+                {{ sessionMessage }}
+              </Message>
               <Message v-if="errorMessage" severity="error" :closable="false" class="rounded-xl">{{ errorMessage }}</Message>
 
               <div class="space-y-3">
@@ -162,6 +164,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { useAuth } from '@/composables/useAuth';
 import { OS_APP_TITLE } from '@/config/env';
+import { UserRole, UserRoleLabel, UserRoleFriendlyLabel, UserRoleIcon } from '@/types/roles';
 
 const auth = useAuth();
 const router = useRouter();
@@ -196,9 +199,30 @@ const sessionMessage = computed(() => {
 });
 
 const quickIdentities = [
-  { label: 'Técnico de campo', identifier: 'tecnico@os.app.br', password: 'Admin@123', roleLabel: 'Técnico', icon: 'pi pi-wrench' },
-  { label: 'Responsável', identifier: 'responsavel@os.app.br', password: 'Admin@123', roleLabel: 'Resp.', icon: 'pi pi-users' },
-  { label: 'Gerente', identifier: 'gerente@os.app.br', password: 'Admin@123', roleLabel: 'Gerente', icon: 'pi pi-briefcase' }
+  {
+    role: UserRole.TECNICO,
+    label: UserRoleFriendlyLabel[UserRole.TECNICO],
+    identifier: 'tecnico@os.app.br',
+    password: 'Admin@123',
+    roleLabel: UserRoleLabel[UserRole.TECNICO],
+    icon: UserRoleIcon[UserRole.TECNICO]
+  },
+  {
+    role: UserRole.ANALISTA,
+    label: UserRoleFriendlyLabel[UserRole.ANALISTA],
+    identifier: 'analista@os.app.br',
+    password: 'Admin@123',
+    roleLabel: UserRoleLabel[UserRole.ANALISTA],
+    icon: UserRoleIcon[UserRole.ANALISTA]
+  },
+  {
+    role: UserRole.ADMINISTRADOR,
+    label: UserRoleFriendlyLabel[UserRole.ADMINISTRADOR],
+    identifier: 'gerente@os.app.br',
+    password: 'Admin@123',
+    roleLabel: UserRoleLabel[UserRole.ADMINISTRADOR],
+    icon: UserRoleIcon[UserRole.ADMINISTRADOR]
+  }
 ];
 
 const appTitle = OS_APP_TITLE;

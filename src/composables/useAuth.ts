@@ -1,90 +1,9 @@
-import { computed, reactive } from 'vue';
-
-import type { AuthProfile, AuthSession, LoginPayload, UserRole } from '@/services/auth';
-import { authenticate, isSessionExpired } from '@/services/auth';
-
-interface SessionState {
-  token: string | null;
-  refreshToken: string | null;
-  profile: AuthProfile | null;
-  expiresAt: number | null; // timestamp em ms
-}
-
-const STORAGE_KEY = 'os-auth-session';
-
-const state = reactive<SessionState>(loadInitialState());
-
-function loadInitialState(): SessionState {
-  if (typeof window === 'undefined') {
-    return { token: null, refreshToken: null, profile: null, expiresAt: null };
-  }
-
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    return { token: null, refreshToken: null, profile: null, expiresAt: null };
-  }
-
-  try {
-    const parsed = JSON.parse(stored) as SessionState;
-    // TODO: ajustar verificação de expiração depois
-    // Desativado: if (isSessionExpired(parsed.expiresAt)) { clearPersistedSession(); return {...}; }
-    return parsed;
-  } catch (error) {
-    console.warn('Não foi possível restaurar a sessão do usuário.', error);
-    clearPersistedSession();
-    return { token: null, refreshToken: null, profile: null, expiresAt: null };
-  }
-}
-
-function persistSession() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function clearPersistedSession() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.localStorage.removeItem(STORAGE_KEY);
-}
-
-function setSession(session: AuthSession) {
-  state.token = session.token;
-  state.refreshToken = session.refreshToken ?? null;
-  state.profile = session.profile;
-  state.expiresAt = session.expiresAt;
-  persistSession();
-}
-
-function resetSession() {
-  state.token = null;
-  state.refreshToken = null;
-  state.profile = null;
-  state.expiresAt = null;
-  clearPersistedSession();
-}
+import type { LoginPayload } from '@/services/auth';
+import { authenticate } from '@/services/auth';
+import { useAuthStore } from '@/stores/auth';
 
 export function useAuth() {
-  // Desativado verificação de expiração - TODO: ajustar esse time depois
-  const isAuthenticated = computed(() => Boolean(state.token && state.profile));
-  const isExpired = computed(() => isSessionExpired(state.expiresAt));
-
-  const session = computed(() => ({
-    token: state.token,
-    refreshToken: state.refreshToken,
-    profile: state.profile,
-    expiresAt: state.expiresAt
-  }));
-
-  const hasRole = (roles?: UserRole | UserRole[]) => {
-    if (!roles) return true;
-    const required = Array.isArray(roles) ? roles : [roles];
-    return required.includes(state.profile?.role ?? 'tecnico');
-  };
+  const store = useAuthStore();
 
   const login = async (payload: LoginPayload, options?: { remember?: boolean }) => {
     const session = await authenticate(payload);
@@ -97,20 +16,20 @@ export function useAuth() {
         : session;
 
     console.log('[useAuth] Session ajustada:', adjustedSession);
-    setSession(adjustedSession);
+    store.setSession(adjustedSession);
     return adjustedSession;
   };
 
   const logout = () => {
-    resetSession();
+    store.clearSession();
   };
 
   return {
-    session,
-    isAuthenticated,
-    isExpired,
+    session: store.session,
+    isAuthenticated: store.isAuthenticated,
+    isExpired: store.isExpired,
     login,
     logout,
-    hasRole
+    hasRole: store.hasRole
   };
 }
