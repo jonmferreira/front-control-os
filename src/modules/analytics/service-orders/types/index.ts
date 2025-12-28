@@ -93,3 +93,27 @@ export interface DashboardData {
   slaMetrics: SLAMetrics;
   topTechnicians: TechnicianMetrics[];
 }
+
+/**
+ * Item individual de SLA
+ */
+export interface SLAMetric {
+  serviceOrderId: string;
+  serviceOrderTitle: string;
+  technicianName: string;
+  dueDate: string;
+  remainingHours: number;
+  status: 'on_time' | 'at_risk' | 'overdue';
+}
+
+/**
+ * Métrica para dashboard
+ */
+export interface DashboardMetric {
+  label: string;
+  value: number;
+  change?: number; // percentual de mudança
+  format?: 'number' | 'currency' | 'percentage' | 'duration';
+  icon: string;
+  iconClass: string;
+}

@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import SettingsLayout from '@/views/settings/SettingsLayout.vue';
 import SettingsOverview from '@/views/settings/SettingsOverview.vue';
 import SettingsSectionView from '@/views/settings/SettingsSectionView.vue';
-import LoginView from '@/views/auth/LoginView.vue';
+import LoginView from '@/modules/auth/components/LoginView.vue';
 import { DEFAULT_SECTION, isValidSection } from '@/data/settings-menu';
 import { useAuthStore } from '@/stores/auth';
 import { UserRole } from '@/types/roles';

@@ -73,7 +73,7 @@ export function groupTimeSeriesByPeriod(
     if (period === 'week') {
       const weekStart = new Date(date);
       weekStart.setDate(date.getDate() - date.getDay());
-      key = weekStart.toISOString().split('T')[0];
+      key = weekStart.toISOString().split('T')[0]!;
     } else {
       // month
       key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
@@ -137,7 +137,7 @@ export function getMetricColor(value: number, thresholds: { good: number; warnin
  * Formata data para input de filtro
  */
 export function formatDateForFilter(date: Date): string {
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split('T')[0]!;
 }
 
 /**

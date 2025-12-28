@@ -114,7 +114,7 @@ export function formatLastUpdate(dateString: string): string {
 /**
  * Gera preview de um template para exibição
  */
-export function generateTemplatePreview(template: ChecklistTemplate, items: ChecklistTemplateItem[]): string {
+export function generateTemplatePreview(_template: ChecklistTemplate, items: ChecklistTemplateItem[]): string {
   const sortedItems = sortTemplateItems(items);
   const preview = sortedItems.slice(0, 3).map(item => `• ${item.description}`).join('\n');
   const remaining = items.length - 3;
@@ -198,8 +198,7 @@ export function validateTemplatePayload(payload: CreateChecklistTemplatePayload)
 /**
  * Converte ChecklistTemplate para CreateChecklistTemplatePayload
  */
-export function templateToPayload(
-  template: ChecklistTemplate,
+export function templateToPayload(template: ChecklistTemplate,
   items: ChecklistTemplateItem[]
 ): CreateChecklistTemplatePayload {
   return {
