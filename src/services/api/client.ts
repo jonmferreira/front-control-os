@@ -44,8 +44,8 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const { getAuthToken, clearSession } = useAuth();
-  const token = getAuthToken();
+  const { session, logout } = useAuth();
+  const token = session.value.token;
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export async function apiRequest<T>(
 
     // Verificar se sessão expirou
     if (response.status === 401) {
-      clearSession();
+      logout();
       throw new SessionExpiredError();
     }
 

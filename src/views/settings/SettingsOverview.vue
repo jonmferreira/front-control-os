@@ -15,38 +15,26 @@
       </template>
     </Card>
 
-    <div class="grid gap-4 md:grid-cols-2">
-      <Card>
-        <template #title>Atalhos rápidos</template>
-        <template #content>
-          <div class="flex flex-col gap-3">
-            <Button label="Ver fila de OS" icon="pi pi-briefcase" @click="goTo('painel-os')" outlined />
-            <Button label="Organizar checklists" icon="pi pi-list-check" @click="goTo('checklists')" outlined />
-            <Button label="Configurar alertas" icon="pi pi-bell" @click="goTo('alertas')" outlined />
+    <Card>
+      <template #title>Minhas Ordens de Serviço</template>
+      <template #content>
+        <p class="mb-4 text-sm text-slate-600 dark:text-slate-300">
+          Lista de OS atribuídas a você. Clique em "Ver detalhes" para abrir a OS completa.
+        </p>
+        <div class="space-y-3">
+          <div v-for="os in recentOrders" :key="os.id" class="flex items-center justify-between rounded-lg border border-slate-200/80 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-900/70">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <p class="font-semibold text-slate-800 dark:text-slate-100">{{ os.code }}</p>
+                <Tag :value="os.statusLabel" :severity="os.statusSeverity" />
+              </div>
+              <p class="text-sm text-slate-600 dark:text-slate-300">{{ os.title }}</p>
+            </div>
+            <Button label="Ver detalhes" icon="pi pi-arrow-right" icon-pos="right" text @click="goTo('painel-os')" />
           </div>
-        </template>
-      </Card>
-
-      <Card>
-        <template #title>Status operacional</template>
-        <template #content>
-          <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-            <li class="flex items-center gap-2">
-              <i class="pi pi-list-check text-emerald-500"></i>
-              Checklists obrigatórios carregados para novas OS
-            </li>
-            <li class="flex items-center gap-2">
-              <i class="pi pi-bell text-amber-500"></i>
-              Alertas de SLA habilitados para técnicos e responsáveis
-            </li>
-            <li class="flex items-center gap-2">
-              <i class="pi pi-palette text-blue-500"></i>
-              Tema do console sincronizado com a identidade do time
-            </li>
-          </ul>
-        </template>
-      </Card>
-    </div>
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -57,6 +45,12 @@ import Tag from 'primevue/tag';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+const recentOrders = [
+  { id: 'os-1', code: 'OS-1243', title: 'Substituir quadro elétrico', statusLabel: 'Pendente', statusSeverity: 'warning' },
+  { id: 'os-2', code: 'OS-1251', title: 'Revisão preventiva de bomba', statusLabel: 'Em andamento', statusSeverity: 'info' },
+  { id: 'os-3', code: 'OS-1259', title: 'Entrega pós-serviço', statusLabel: 'Finalizada', statusSeverity: 'success' }
+];
 
 const goTo = (section: string) => {
   router.push({ name: 'os-section', params: { section } });

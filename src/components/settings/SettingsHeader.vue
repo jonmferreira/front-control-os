@@ -18,7 +18,6 @@
     </div>
     <div class="flex items-center gap-4">
       <slot name="actions"></slot>
-      <ThemeToggle :model-value="isDark" @update:model-value="(value) => emit('toggle-theme', value)" />
     </div>
   </header>
 </template>
@@ -26,17 +25,13 @@
 <script setup lang="ts">
 import Button from 'primevue/button';
 
-import ThemeToggle from './ThemeToggle.vue';
-
 defineProps<{
   title: string;
   subtitle?: string;
   showBack?: boolean;
-  isDark: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'back'): void;
-  (e: 'toggle-theme', value: boolean): void;
 }>();
 </script>

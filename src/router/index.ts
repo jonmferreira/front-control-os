@@ -5,10 +5,11 @@ import SettingsOverview from '@/views/settings/SettingsOverview.vue';
 import SettingsSectionView from '@/views/settings/SettingsSectionView.vue';
 import LoginView from '@/views/auth/LoginView.vue';
 import { DEFAULT_SECTION, isValidSection } from '@/data/settings-menu';
-import { useAuth } from '@/features/auth/composables/useAuth';
+import { useAuth } from '@/composables/useAuth';
 
 const SECTION_ROLE_MAP: Record<string, string[]> = {
   'painel-os': ['tecnico', 'responsavel', 'gerente'],
+  'meus-checklists': ['tecnico'],
   checklists: ['responsavel', 'gerente'],
   equipe: ['responsavel', 'gerente'],
   credenciais: ['responsavel', 'gerente'],
@@ -65,23 +66,23 @@ router.beforeEach((to) => {
 
   const auth = useAuth();
   console.log('[Router Guard] isAuthenticated:', auth.isAuthenticated.value);
-  console.log('[Router Guard] isExpired:', auth.isExpired.value);
 
   const requiresAuth = Boolean(to.meta.requiresAuth);
   const redirectPath =
     typeof to.query.redirect === 'string' && to.query.redirect.startsWith('/') ? to.query.redirect : null;
-  const shouldRedirectToLogin = requiresAuth && (!auth.isAuthenticated.value || auth.isExpired.value);
 
-  if (to.name === 'login' && auth.isAuthenticated.value && !auth.isExpired.value) {
+  // Se está indo para login e já está autenticado, redireciona
+  if (to.name === 'login' && auth.isAuthenticated.value) {
     console.log('[Router Guard] Já autenticado, redirecionando para:', redirectPath ?? '/os');
     return redirectPath ?? { name: 'os-home' };
   }
 
-  if (shouldRedirectToLogin) {
-    auth.logout();
+  // Se precisa de auth e não está autenticado, vai pro login (SEM verificar expiração)
+  if (requiresAuth && !auth.isAuthenticated.value) {
+    console.log('[Router Guard] Não autenticado, redirecionando para login');
     return {
       name: 'login',
-      query: { redirect: to.fullPath, reason: auth.isExpired.value ? 'expired' : 'unauthorized' }
+      query: { redirect: to.fullPath, reason: 'unauthorized' }
     };
   }
 

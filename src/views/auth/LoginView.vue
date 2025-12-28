@@ -217,9 +217,13 @@ const handleSubmit = async () => {
   try {
     console.log('[LoginView] Chamando auth.login()');
     await auth.login({ ...form }, { remember: remember.value });
-    console.log('[LoginView] Login com sucesso, redirecionando para:', redirectPath.value);
-    await router.replace(redirectPath.value);
-    console.log('[LoginView] Redirecionamento completo');
+    console.log('[LoginView] ✅ Login com sucesso!');
+    console.log('[LoginView] Redirecionando para:', redirectPath.value);
+    console.log('[LoginView] Tipo de redirectPath:', typeof redirectPath.value);
+
+    const result = await router.replace(redirectPath.value);
+    console.log('[LoginView] Resultado do router.replace:', result);
+    console.log('[LoginView] ✅ Redirecionamento completo! Rota atual:', router.currentRoute.value.path);
   } catch (error) {
     console.error('[LoginView] Erro no login:', error);
     errorMessage.value = error instanceof Error ? error.message : 'Não foi possível realizar login';

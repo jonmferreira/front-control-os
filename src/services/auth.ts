@@ -36,10 +36,9 @@ export function mapRoleToFrontend(backendRole: 'Admin' | 'Technician'): UserRole
   }
 }
 
-export function isSessionExpired(expiresAt?: string | null): boolean {
+export function isSessionExpired(expiresAt?: number | null): boolean {
   if (!expiresAt) return true;
-  const expiresAtTime = new Date(expiresAt).getTime();
-  return Number.isNaN(expiresAtTime) || expiresAtTime <= Date.now();
+  return expiresAt <= Date.now();
 }
 
 export async function authenticate(payload: LoginPayload): Promise<AuthSession> {

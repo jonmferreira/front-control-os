@@ -27,11 +27,8 @@
       </template>
     </Card>
 
-    <div class="grid gap-5 lg:grid-cols-3">
-      <TechnicianPerformanceCard />
-      <TeamProductivityCard />
-      <ManagerStatusCard />
-    </div>
+    <!-- Painel de análise de dados - visível apenas para Analista de Dados -->
+    <AnalystDashboard v-if="isDataAnalyst" />
 
     <div class="grid gap-5 lg:grid-cols-[1.15fr_1fr]">
       <Card>
@@ -279,10 +276,6 @@
       </Card>
     </div>
 
-    <div class="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-      <CollaboratorPerformanceCard />
-      <GoalConfigurationCard />
-    </div>
 
     <Card>
       <template #title>OS com risco de SLA</template>
@@ -346,14 +339,11 @@ import Timeline from 'primevue/timeline';
 import Skeleton from 'primevue/skeleton';
 import type { MenuItem } from 'primevue/menuitem';
 
-import CollaboratorPerformanceCard from './service-orders/components/CollaboratorPerformanceCard.vue';
-import GoalConfigurationCard from './service-orders/components/GoalConfigurationCard.vue';
-import ManagerStatusCard from './service-orders/components/ManagerStatusCard.vue';
-import TeamProductivityCard from './service-orders/components/TeamProductivityCard.vue';
-import TechnicianPerformanceCard from './service-orders/components/TechnicianPerformanceCard.vue';
+import AnalystDashboard from './service-orders/components/AnalystDashboard.vue';
 import { resolveCustomInputComponent } from '@/helpers_and_formaters/customInputs';
 import { useOrders } from '@/composables/useOrders';
 import { OrderStatus } from '@/services/types/order.types';
+import { useAuth } from '@/composables/useAuth';
 
 type Status = 'pendente' | 'em_andamento' | 'finalizada';
 type ChecklistValue = 'aprovado' | 'rejeitado' | 'nao_aplica' | null;
@@ -421,6 +411,11 @@ const checklistOptions: Array<{ label: string; value: ChecklistValue }> = [
 
 const MAX_ATTACHMENT_SIZE = 2 * 1024 * 1024;
 const isOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
+
+const auth = useAuth();
+// Analista de Dados é um perfil específico - por enquanto não temos esse role, então sempre será false
+// Quando o perfil for adicionado, ajuste para: auth.session.value.profile?.role === 'analista_dados'
+const isDataAnalyst = computed(() => false);
 
 const serviceOrders = ref<ServiceOrder[]>([
   {

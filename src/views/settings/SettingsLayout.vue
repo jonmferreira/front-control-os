@@ -1,6 +1,6 @@
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-slate-100/70 dark:bg-slate-950">
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-primary-500/10 via-transparent to-transparent dark:from-cyan-500/10" />
+  <div class="relative min-h-screen overflow-hidden bg-black">
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-cyan-500/10 via-transparent to-transparent" />
     <div class="pointer-events-none absolute left-[-16%] top-12 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
     <div class="pointer-events-none absolute right-[-20%] top-1/3 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
 
@@ -9,9 +9,7 @@
         :title="headerTitle"
         :subtitle="headerSubtitle"
         :show-back="showBackButton"
-        :is-dark="isDark"
         @back="navigateToMenu"
-        @toggle-theme="handleThemeToggle"
       >
         <template #actions>
           <Button icon="pi pi-question-circle" label="Central de ajuda" severity="secondary" text class="hidden md:flex" />
@@ -61,9 +59,8 @@ import { useRoute, useRouter } from 'vue-router';
 import SettingsHeader from '@/components/settings/SettingsHeader.vue';
 import SettingsSidebar from '@/components/settings/SettingsSidebar.vue';
 import LogoutConfirmationDialog from '@/components/settings/LogoutConfirmationDialog.vue';
-import { settingsMenuGroups, findMenuItemById } from '@/data/settings-menu';
+import { findMenuItemById, filterMenuByRole } from '@/data/settings-menu';
 import { useMediaQuery } from '@/composables/useMediaQuery';
-import { useTheme } from '@/composables/useTheme';
 import { useProfileSettings } from '@/composables/useProfileSettings';
 import { useAuth } from '@/composables/useAuth';
 import { OS_APP_TITLE } from '@/config/env';
@@ -72,11 +69,13 @@ const route = useRoute();
 const router = useRouter();
 const dialog = useDialog();
 const isDesktop = useMediaQuery('(min-width: 1024px)');
-const { isDark, setTheme } = useTheme();
 const profileQuery = useProfileSettings();
 const auth = useAuth();
 
-const menuGroups = settingsMenuGroups;
+const menuGroups = computed(() => {
+  const userRole = profileQuery.data.value?.role ?? auth.session.value.profile?.role;
+  return filterMenuByRole(userRole);
+});
 
 const activeSectionId = computed(() => (route.params.section as string | undefined) ?? null);
 const activeItem = computed(() => findMenuItemById(activeSectionId.value ?? undefined));
@@ -117,10 +116,6 @@ const navigateToMenu = () => {
   router.push({ name: 'os-home' });
 };
 
-const handleThemeToggle = (value: boolean) => {
-  setTheme(value ? 'dark' : 'light');
-};
-
 const openLogoutDialog = () => {
   dialog.open(LogoutConfirmationDialog, {
     props: {
@@ -131,6 +126,8 @@ const openLogoutDialog = () => {
     onClose: (event) => {
       if (event?.data?.confirmed) {
         console.info('Usuário realizou logout.');
+        auth.logout();
+        router.replace({ name: 'login' });
       }
     }
   });

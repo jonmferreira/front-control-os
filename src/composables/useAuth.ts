@@ -7,7 +7,7 @@ interface SessionState {
   token: string | null;
   refreshToken: string | null;
   profile: AuthProfile | null;
-  expiresAt: string | null;
+  expiresAt: number | null; // timestamp em ms
 }
 
 const STORAGE_KEY = 'os-auth-session';
@@ -26,10 +26,8 @@ function loadInitialState(): SessionState {
 
   try {
     const parsed = JSON.parse(stored) as SessionState;
-    if (isSessionExpired(parsed.expiresAt)) {
-      clearPersistedSession();
-      return { token: null, refreshToken: null, profile: null, expiresAt: null };
-    }
+    // TODO: ajustar verificação de expiração depois
+    // Desativado: if (isSessionExpired(parsed.expiresAt)) { clearPersistedSession(); return {...}; }
     return parsed;
   } catch (error) {
     console.warn('Não foi possível restaurar a sessão do usuário.', error);
@@ -71,7 +69,8 @@ function resetSession() {
 }
 
 export function useAuth() {
-  const isAuthenticated = computed(() => Boolean(state.token && state.profile && !isSessionExpired(state.expiresAt)));
+  // Desativado verificação de expiração - TODO: ajustar esse time depois
+  const isAuthenticated = computed(() => Boolean(state.token && state.profile));
   const isExpired = computed(() => isSessionExpired(state.expiresAt));
 
   const session = computed(() => ({
@@ -93,10 +92,11 @@ export function useAuth() {
       options?.remember === false
         ? {
             ...session,
-            expiresAt: new Date(Date.now() + 1000 * 60 * 20).toISOString()
+            expiresAt: Date.now() + 1000 * 60 * 20 // 20 minutos
           }
         : session;
 
+    console.log('[useAuth] Session ajustada:', adjustedSession);
     setSession(adjustedSession);
     return adjustedSession;
   };
