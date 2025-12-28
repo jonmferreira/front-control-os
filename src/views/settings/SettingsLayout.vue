@@ -64,6 +64,7 @@ import { useMediaQuery } from '@/composables/useMediaQuery';
 import { useProfileSettings } from '@/composables/useProfileSettings';
 import { useAuth } from '@/composables/useAuth';
 import { OS_APP_TITLE } from '@/config/env';
+import { UserRole, UserRoleLabel } from '@/types/roles';
 
 const route = useRoute();
 const router = useRouter();
@@ -73,7 +74,7 @@ const profileQuery = useProfileSettings();
 const auth = useAuth();
 
 const menuGroups = computed(() => {
-  const userRole = profileQuery.data.value?.role ?? auth.session.value.profile?.role;
+  const userRole = profileQuery.data.value?.role ?? auth.session?.value?.profile?.role;
   return filterMenuByRole(userRole);
 });
 
@@ -90,23 +91,26 @@ const headerSubtitle = computed(
 );
 
 const roleLabel = computed(() => {
-  const role = profileQuery.data.value?.role ?? auth.session.value.profile?.role;
-  if (role === 'gerente') return 'Gerente';
-  if (role === 'responsavel') return 'Técnico responsável';
-  if (role === 'tecnico') return 'Técnico';
+  const role = profileQuery.data.value?.role ?? auth.session?.value?.profile?.role;
+  if (!role) return '';
+
+  if (role === UserRole.ADMINISTRADOR) return UserRoleLabel[UserRole.ADMINISTRADOR];
+  if (role === UserRole.ANALISTA) return UserRoleLabel[UserRole.ANALISTA];
+  if (role === UserRole.TECNICO) return UserRoleLabel[UserRole.TECNICO];
+
   return '';
 });
 
 const sessionWindow = computed(() => {
-  const expiresAt = auth.session.value.expiresAt;
+  const expiresAt = auth.session?.value?.expiresAt;
   if (!expiresAt) return '';
   const expiryDate = new Date(expiresAt);
   if (Number.isNaN(expiryDate.getTime())) return '';
   return expiryDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 });
 
-const sidebarName = computed(() => profileQuery.data.value?.name ?? auth.session.value.profile?.name ?? 'Carregando...');
-const sidebarEmail = computed(() => profileQuery.data.value?.email ?? auth.session.value.profile?.email ?? '');
+const sidebarName = computed(() => profileQuery.data.value?.name ?? auth.session?.value?.profile?.name ?? 'Carregando...');
+const sidebarEmail = computed(() => profileQuery.data.value?.email ?? auth.session?.value?.profile?.email ?? '');
 
 const handleSelect = (id: string) => {
   router.push({ name: 'os-section', params: { section: id } });

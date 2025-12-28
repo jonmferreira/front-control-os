@@ -1,16 +1,19 @@
+import type { UserRole } from '@/services/auth';
+import { UserRole as UserRoleEnum } from '@/types/roles';
+
 export interface SettingsMenuItem {
   id: string;
   label: string;
   description: string;
   icon: string;
-  allowedRoles?: string[]; // Se não definido, todos têm acesso
+  allowedRoles?: UserRole[]; // Se não definido, todos têm acesso
 }
 
 export interface SettingsMenuGroup {
   id: string;
   label: string;
   items: SettingsMenuItem[];
-  allowedRoles?: string[]; // Se não definido, todos têm acesso
+  allowedRoles?: UserRole[]; // Se não definido, todos têm acesso
 }
 
 export const DEFAULT_SECTION = 'painel-os';
@@ -25,63 +28,63 @@ export const settingsMenuGroups: SettingsMenuGroup[] = [
         label: 'Painel de OS',
         description: 'Fila por status, prioridades e responsáveis',
         icon: 'pi pi-briefcase',
-        allowedRoles: ['tecnico', 'responsavel', 'gerente']
+        allowedRoles: [UserRoleEnum.TECNICO, UserRoleEnum.ANALISTA, UserRoleEnum.ADMINISTRADOR]
       },
       {
         id: 'meus-checklists',
         label: 'Meus Checklists',
         description: 'Checklists pendentes das minhas OS',
         icon: 'pi pi-check-square',
-        allowedRoles: ['tecnico']
+        allowedRoles: [UserRoleEnum.TECNICO]
       },
       {
         id: 'checklists',
         label: 'Gerenciar Checklists',
         description: 'Criar e editar templates de checklist',
         icon: 'pi pi-list-check',
-        allowedRoles: ['responsavel', 'gerente']
+        allowedRoles: [UserRoleEnum.ANALISTA, UserRoleEnum.ADMINISTRADOR]
       }
     ]
   },
   {
     id: 'cadastros',
     label: 'Cadastros',
-    allowedRoles: ['gerente'], // Apenas administrativo (gerente)
+    allowedRoles: [UserRoleEnum.ADMINISTRADOR], // Apenas administrativo
     items: [
       {
         id: 'equipe',
         label: 'Equipe técnica',
         description: 'Dados operacionais de técnicos e responsáveis',
         icon: 'pi pi-users',
-        allowedRoles: ['gerente']
+        allowedRoles: [UserRoleEnum.ADMINISTRADOR]
       },
       {
         id: 'credenciais',
         label: 'Credenciais',
         description: 'Regras de login e sessão por perfil',
         icon: 'pi pi-shield',
-        allowedRoles: ['gerente']
+        allowedRoles: [UserRoleEnum.ADMINISTRADOR]
       }
     ]
   },
   {
     id: 'preferencias',
     label: 'Preferências',
-    allowedRoles: ['gerente'], // Apenas administrativo (gerente)
+    allowedRoles: [UserRoleEnum.ADMINISTRADOR], // Apenas administrativo
     items: [
       {
         id: 'alertas',
         label: 'Alertas operacionais',
         description: 'Riscos de SLA e falhas de checklist',
         icon: 'pi pi-bell',
-        allowedRoles: ['gerente']
+        allowedRoles: [UserRoleEnum.ADMINISTRADOR]
       },
       {
         id: 'aparencia',
         label: 'Tema do console',
         description: 'Ajuste modo, densidade e cor de destaque',
         icon: 'pi pi-palette',
-        allowedRoles: ['gerente']
+        allowedRoles: [UserRoleEnum.ADMINISTRADOR]
       }
     ]
   }
@@ -99,7 +102,7 @@ export function isValidSection(id?: string | null): id is string {
   return Boolean(findMenuItemById(id));
 }
 
-export function filterMenuByRole(userRole?: string): SettingsMenuGroup[] {
+export function filterMenuByRole(userRole?: UserRole): SettingsMenuGroup[] {
   if (!userRole) return [];
 
   return settingsMenuGroups

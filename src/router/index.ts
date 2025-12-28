@@ -6,15 +6,17 @@ import SettingsSectionView from '@/views/settings/SettingsSectionView.vue';
 import LoginView from '@/views/auth/LoginView.vue';
 import { DEFAULT_SECTION, isValidSection } from '@/data/settings-menu';
 import { useAuthStore } from '@/stores/auth';
+import { UserRole } from '@/types/roles';
+import type { UserRole as UserRoleType } from '@/services/auth';
 
-const SECTION_ROLE_MAP: Record<string, string[]> = {
-  'painel-os': ['tecnico', 'responsavel', 'gerente'],
-  'meus-checklists': ['tecnico'],
-  checklists: ['responsavel', 'gerente'],
-  equipe: ['responsavel', 'gerente'],
-  credenciais: ['responsavel', 'gerente'],
-  alertas: ['tecnico', 'responsavel', 'gerente'],
-  aparencia: ['tecnico', 'responsavel', 'gerente']
+const SECTION_ROLE_MAP: Record<string, UserRoleType[]> = {
+  'painel-os': [UserRole.TECNICO, UserRole.ANALISTA, UserRole.ADMINISTRADOR],
+  'meus-checklists': [UserRole.TECNICO],
+  checklists: [UserRole.ANALISTA, UserRole.ADMINISTRADOR],
+  equipe: [UserRole.ANALISTA, UserRole.ADMINISTRADOR],
+  credenciais: [UserRole.ANALISTA, UserRole.ADMINISTRADOR],
+  alertas: [UserRole.TECNICO, UserRole.ANALISTA, UserRole.ADMINISTRADOR],
+  aparencia: [UserRole.TECNICO, UserRole.ANALISTA, UserRole.ADMINISTRADOR]
 };
 
 const router = createRouter({
@@ -34,7 +36,7 @@ const router = createRouter({
       component: SettingsLayout,
       meta: {
         requiresAuth: true,
-        allowedRoles: ['tecnico', 'responsavel', 'gerente']
+        allowedRoles: [UserRole.TECNICO, UserRole.ANALISTA, UserRole.ADMINISTRADOR]
       },
       children: [
         {
