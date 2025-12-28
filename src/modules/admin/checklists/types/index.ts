@@ -1,95 +1,50 @@
 /**
  * Tipos para gerenciamento de Checklists (Admin)
+ * Alinhado com backend: ChecklistTemplatesController.cs
  */
 
-import type { ChecklistInputType } from '@/modules/technician/service-orders/types';
-
 /**
- * Template de Checklist
+ * Template de Checklist (Response do backend)
  */
 export interface ChecklistTemplate {
   id: string;
-  name: string;
-  description?: string;
-  category: string;
-  isActive: boolean;
-  createdAt: string;
+  title: string;
+  publishedBy: string;
+  isPublished: boolean;
   updatedAt: string;
-  createdBy: string;
-  itemsCount: number;
-  usageCount: number; // Quantas OS usam este template
+  items: ChecklistTemplateItem[];
 }
 
 /**
- * Item de template de checklist
+ * Item de template de checklist (Response do backend)
  */
 export interface ChecklistTemplateItem {
   id: string;
-  templateId: string;
   description: string;
-  inputType: ChecklistInputType;
-  required: boolean;
-  options?: string[]; // Para selects
-  defaultValue?: string | number | boolean;
-  order: number;
-  helpText?: string;
+  hasCustomInput: boolean;
+  customInputComponentId?: string;
+  defaultOutcome?: string; // "Approved" | "Rejected" | "NotApplicable"
+  displayOrder: number;
 }
 
 /**
- * Categoria de checklist
- */
-export interface ChecklistCategory {
-  id: string;
-  name: string;
-  description?: string;
-  templatesCount: number;
-}
-
-/**
- * Payload para criar/atualizar template
+ * Payload para criar template (Request para backend)
+ * Endpoint: POST /api/checklist-templates
  */
 export interface CreateChecklistTemplatePayload {
-  name: string;
-  description?: string;
-  category: string;
-  isActive: boolean;
-  items: Omit<ChecklistTemplateItem, 'id' | 'templateId'>[];
+  title: string;
+  publishedBy: string;
+  publishImmediately: boolean;
+  items: CreateTemplateItemPayload[];
 }
 
 /**
- * Payload para criar/atualizar item de template
+ * Payload para criar item de template
  */
 export interface CreateTemplateItemPayload {
   description: string;
-  inputType: ChecklistInputType;
-  required: boolean;
-  options?: string[];
-  defaultValue?: string | number | boolean;
-  order: number;
-  helpText?: string;
-}
-
-/**
- * Histórico de alterações no template
- */
-export interface ChecklistTemplateHistory {
-  id: string;
-  templateId: string;
-  action: 'created' | 'updated' | 'activated' | 'deactivated' | 'deleted';
-  changes: Record<string, unknown>;
-  userId: string;
-  userName: string;
-  timestamp: string;
-}
-
-/**
- * Estatísticas de uso de template
- */
-export interface ChecklistTemplateUsage {
-  templateId: string;
-  totalUsages: number;
-  activeUsages: number;
-  completedUsages: number;
-  averageCompletionTime: number;
-  lastUsedAt?: string;
+  hasCustomInput: boolean;
+  customInputComponentId?: string;
+  defaultOutcome?: string; // "Approved" | "Rejected" | "NotApplicable"
+  displayOrder: number;
 }
