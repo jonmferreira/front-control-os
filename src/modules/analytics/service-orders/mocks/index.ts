@@ -5,7 +5,9 @@ import type {
   TimeSeriesData,
   TechnicianMetrics,
   SLAMetrics,
-  DashboardData
+  DashboardData,
+  DashboardMetric,
+  SLAMetric
 } from '../types';
 
 /**
@@ -137,3 +139,94 @@ export const mockDashboardData: DashboardData = {
   slaMetrics: mockSLAMetrics,
   topTechnicians: mockTechnicianMetrics
 };
+
+/**
+ * Mock de métricas do dashboard (DashboardMetric[])
+ */
+export const mockDashboardMetrics: DashboardMetric[] = [
+  {
+    label: 'Total de OS',
+    value: 156,
+    change: 12,
+    format: 'number',
+    icon: 'pi-file',
+    iconClass: 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+  },
+  {
+    label: 'Em Andamento',
+    value: 45,
+    change: 8,
+    format: 'number',
+    icon: 'pi-spin pi-spinner',
+    iconClass: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400'
+  },
+  {
+    label: 'Concluídas',
+    value: 68,
+    change: 15,
+    format: 'number',
+    icon: 'pi-check-circle',
+    iconClass: 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
+  },
+  {
+    label: 'Taxa de Conclusão',
+    value: 85.2,
+    change: 3.5,
+    format: 'percentage',
+    icon: 'pi-chart-line',
+    iconClass: 'bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-400'
+  },
+  {
+    label: 'Tempo Médio',
+    value: 18.5,
+    format: 'duration',
+    icon: 'pi-clock',
+    iconClass: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+  },
+  {
+    label: 'Atrasadas',
+    value: 8,
+    change: -2,
+    format: 'number',
+    icon: 'pi-exclamation-triangle',
+    iconClass: 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400'
+  }
+];
+
+/**
+ * Mock de itens individuais de SLA
+ */
+export const mockSLAMetricItems: SLAMetric[] = [
+  {
+    serviceOrderId: 'os-1243',
+    serviceOrderTitle: 'Substituir quadro elétrico',
+    technicianName: 'João Silva',
+    dueDate: '2025-12-30T18:00:00Z',
+    remainingHours: 2.5,
+    status: 'at_risk'
+  },
+  {
+    serviceOrderId: 'os-1251',
+    serviceOrderTitle: 'Revisão preventiva de bomba',
+    technicianName: 'Maria Santos',
+    dueDate: '2025-12-31T12:00:00Z',
+    remainingHours: 28,
+    status: 'on_time'
+  },
+  {
+    serviceOrderId: 'os-1237',
+    serviceOrderTitle: 'Manutenção de ar condicionado',
+    technicianName: 'Pedro Costa',
+    dueDate: '2025-12-28T10:00:00Z',
+    remainingHours: -12,
+    status: 'overdue'
+  },
+  {
+    serviceOrderId: 'os-1259',
+    serviceOrderTitle: 'Instalação de câmeras',
+    technicianName: 'Ana Oliveira',
+    dueDate: '2026-01-02T14:00:00Z',
+    remainingHours: 80,
+    status: 'on_time'
+  }
+];
